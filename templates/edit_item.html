@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>編輯題目 #{{ item.id }}</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #ffc107; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #495057; }
+        input[type="text"], textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
+        input[type="submit"] { background-color: #ffc107; color: #343a40; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; font-weight: bold; }
+        input[type="submit"]:hover { background-color: #e0a800; }
+        .back-link { color: #007bff; text-decoration: none; margin-top: 20px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✏️ 編輯題目 (ID: {{ item.id }})</h1>
+        
+        <form method="POST">
+            <label for="category">飲品分類：</label>
+            <input type="text" id="category" name="category" required value="{{ item.category }}">
+            
+            <label for="item_name">品項名稱：</label>
+            <input type="text" id="item_name" name="item_name" required value="{{ item.item_name }}">
+
+            <label for="correct_number">正確的數字：</label>
+            <input type="text" id="correct_number" name="correct_number" required value="{{ item.correct_number }}">
+            
+            <label for="unit">單位：</label>
+            <input type="text" id="unit" name="unit" value="{{ item.unit }}">
+            
+            <label for="sentence_template">配料表句子 (含 [NUM]):</label>
+            <textarea id="sentence_template" name="sentence_template" rows="3" required>{{ item.sentence_template }}</textarea>
+            
+            <input type="submit" value="✅ 儲存修改">
+        </form>
+        
+        <p><a href="{{ url_for('manage_items') }}" class="back-link">« 返回管理列表</a></p>
+    </div>
+</body>
+</html>

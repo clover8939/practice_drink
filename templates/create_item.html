@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建立新題目</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; padding: 20px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1 { color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        p { color: #6c757d; }
+        label { display: block; margin-top: 15px; font-weight: bold; color: #495057; }
+        input[type="text"], textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
+        input[type="submit"] { background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; }
+        input[type="submit"]:hover { background-color: #1e7e34; }
+        a { color: #007bff; text-decoration: none; margin-top: 20px; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 建立新題目</h1>
+        <p>請在數字所在位置使用 <code>[NUM]</code> 作為佔位符。</p>
+        
+        <form method="POST">
+            <label for="category">飲品分類：</label>
+            <input type="text" id="category" name="category" required placeholder="例如：茶類、咖啡">
+            
+            <label for="item_name">品項名稱：</label>
+            <input type="text" id="item_name" name="item_name" required placeholder="例如：珍珠奶茶、美式咖啡">
+
+            <label for="correct_number">正確的數字：</label>
+            <input type="text" id="correct_number" name="correct_number" required placeholder="例如：10.5">
+            
+            <label for="unit">單位：</label>
+            <input type="text" id="unit" name="unit" value="克" placeholder="例如：克、毫升">
+            
+            <label for="sentence_template">配料表句子 (含 [NUM]):</label>
+            <textarea id="sentence_template" name="sentence_template" rows="3" required>每100克脂肪含量為 [NUM] 克</textarea>
+            
+            <input type="submit" value="💾 儲存題目">
+        </form>
+        
+        <p><a href="{{ url_for('index') }}">« 回首頁</a></p>
+    </div>
+</body>
+</html>

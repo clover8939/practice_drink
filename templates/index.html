@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>配料表複習器</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+        h1 { color: #007bff; margin-bottom: 30px; border-bottom: 2px solid #e9ecef; padding-bottom: 10px; }
+        ul { list-style: none; padding: 0; }
+        li { margin: 15px 0; }
+        a { text-decoration: none; display: block; background-color: #28a745; color: white; padding: 15px; border-radius: 8px; font-size: 1.1em; transition: background-color 0.3s, transform 0.1s; }
+        a:hover { background-color: #1e7e34; transform: translateY(-2px); }
+        .reset-form { margin-top: 30px; }
+        .reset-btn { background-color: #dc3545; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 1em; transition: background-color 0.3s; }
+        .reset-btn:hover { background-color: #c82333; } 
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🥤 配料表數字複習系統</h1>
+        <ul>
+            <li><a href="{{ url_for('quiz') }}">開始測驗 (選擇範圍)</a></li>
+            <li><a href="{{ url_for('create_item') }}">建立新題目 (配料表)</a></li>
+            <li><a href="{{ url_for('manage_items') }}" style="background-color: #ffc107;">📝 管理/編輯題庫</a></li>
+            <li><a href="{{ url_for('import_items') }}" style="background-color: #17a2b8;">📥 匯入 CSV 題庫</a></li>
+        </ul>
+
+
+        <form method="POST" action="{{ url_for('reset_mastery') }}" class="reset-form" 
+              onsubmit="return confirm('⚠️ 確定要重置所有答對的題目嗎？這會讓它們重新出現在測驗中。')">
+            <button type="submit" class="reset-btn">🔄 重置所有已掌握題目</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>開始測驗</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #343a40; margin-bottom: 10px; }
+        .question-info { font-size: 0.9em; color: #6c757d; margin-bottom: 30px; }
+        .question-text { font-size: 1.8em; font-weight: 300; margin-bottom: 40px; }
+        .unit-highlight { color: #dc3545; font-weight: bold; }
+        
+        /* 卡片佈局與樣式 */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .card {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 25px;
+            border: none;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.4em;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .card:hover {
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+            transform: translateY(-3px);
+        }
+        .fill-input-group { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .fill-input {
+            padding: 15px;
+            font-size: 1.6em;
+            width: 150px;
+            text-align: center;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+        }
+        .fill-btn {
+            background-color: #ffc100;
+            color: #343a40;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.4em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .fill-btn:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤔 請填空</h1>
+        
+        <div class="question-info">
+            **{{ item.category }}** / **{{ item.item_name }}**
+        </div>
+        
+        <div class="question-text">
+            {{ question }} <span class="unit-highlight">{{ unit }}</span>
+        </div>
+        
+        <form id="quiz-form" action="{{ url_for('check_answer') }}" method="POST">
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+            <input type="hidden" name="correct_answer" value="{{ correct_answer }}">
+            <input type="hidden" name="category_filter" value="{{ category_filter }}">
+            <input type="hidden" name="item_filter" value="{{ item_filter }}">
+            <input type="hidden" name="quiz_mode" value="{{ quiz_mode }}"> <div class="card-container"></div>
+            <input type="hidden" name="quiz_method" value="{{ quiz_method }}"> {% if quiz_method == 'card' %}
+
+            <div class="card-container">
+                    {% for option in options %}
+                        <button type="submit" name="choice" value="{{ option }}" class="card">
+                            {{ option }}
+                        </button>
+                    {% endfor %}
+                </div>
+            {% elif quiz_method == 'fill' %}
+            <div class="fill-input-group">
+                    <input type="text" name="choice" class="fill-input" placeholder="請輸入答案" required>
+                    <button type="submit" class="fill-btn">檢查答案</button>
+                </div>
+            {% endif %}
+        </form>
+    </div>
+</body>
+</html>

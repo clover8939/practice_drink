@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重置結果</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; }
+        h1 { color: #dc3545; }
+        .message-box { background-color: #fff3cd; border: 1px solid #ffeeba; padding: 20px; border-radius: 8px; }
+        .action-group { margin-top: 20px; }
+        .action-group a { text-decoration: none; display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; border-radius: 5px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 重置完成！</h1>
+        <div class="message-box">
+            {% if message %}
+                <p>{{ message }}</p>
+            {% else %}
+                <p>成功將 **{{ reset_count }}** 條已掌握的題目重置為待複習狀態。</p>
+            {% endif %}
+        </div>
+        
+        <div class="action-group">
+            <a href="{{ url_for('quiz') }}">開始新測驗</a>
+            <a href="{{ url_for('index') }}">回首頁</a>
+        </div>
+    </div>
+</body>
+</html>
