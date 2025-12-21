@@ -17,23 +17,11 @@
 </head>
 <body>
     <div class="container">
-        <h1>🎯 選擇考試範圍</h1>
+    <h1>🎯 選擇測驗範圍</h1>
         <form method="POST">
             {% if message %}
                 <p style="color: red; font-weight: bold; padding: 10px; background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px;">{{ message }}</p>
             {% endif %}
-
-            <label for="quiz_mode">測驗模式：</label>
-            <select id="quiz_mode" name="quiz_mode">
-                <option value="all" {% if selected_mode == 'all' %}selected{% endif %}>所有題目</option>
-                <option value="missed" {% if selected_mode == 'missed' %}selected{% endif %}>只複習錯題 (is_mastered=0)</option>
-            </select>
-
-            <label for="quiz_method">考試方法：</label>
-            <select id="quiz_method" name="quiz_method">
-                <option value="card" {% if selected_method == 'card' %}selected{% endif %}>翻卡題 (四選一)</option>
-                <option value="fill" {% if selected_method == 'fill' %}selected{% endif %}>填充題 (手動輸入)</option>
-            </select>
 
             <label for="category_filter">按分類考試：</label>
             <select id="category_filter" name="category_filter">
@@ -43,11 +31,11 @@
                 {% endfor %}
             </select>
             
-            <label for="item_filter">按品項考試：</label>
-            <select id="item_filter" name="item_filter">
-                <option value="all">-- 所有品項 --</option>
-                {% for item in all_items %}
-                    <option value="{{ item }}" {% if item == selected_item %}selected{% endif %}>{{ item }}</option>
+            <label for="drink_filter">按飲品考試：</label>
+            <select id="drink_filter" name="drink_filter">
+                <option value="all">-- 所有飲品 --</option>
+                {% for drink in all_drinks %}
+                    <option value="{{ drink }}" {% if drink == selected_drink %}selected{% endif %}>{{ drink }}</option>
                 {% endfor %}
             </select>
             

@@ -3,53 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>結果</title>
+    <title>答題結果</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; }
-        h1.correct { color: #28a745; }
-        h1.wrong { color: #dc3545; }
-        p { font-size: 1.1em; color: #495057; }
-        .answer-box { margin: 20px 0; padding: 15px; border-radius: 8px; background-color: #e9ecef; }
-        .action-group button, .action-group a {
-            padding: 12px 20px;
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #f8f9fa; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 700px; 
+            margin: auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        
+        /* 標題 */
+        h1 { 
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        h1.all-correct { 
+            color: #28a745; 
+        }
+        h1.some-wrong { 
+            color: #ffc100;
+        }
+        h1.all-wrong { 
+            color: #dc3545; 
+        }
+        
+        /* 統計資訊 */
+        .score-summary {
+            text-align: center;
+            padding: 20px;
+            background-color: #f0f0f0;
             border-radius: 8px;
-            font-size: 16px;
-            text-decoration: none;
+            margin-bottom: 30px;
+        }
+        .score-text {
+            font-size: 1.3em;
+            color: #495057;
+            margin: 10px 0;
+        }
+        
+        /* 答案詳情 */
+        .answer-detail {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #ccc;
+        }
+        .answer-detail.correct {
+            border-left-color: #28a745;
+            background-color: #f0fdf4;
+        }
+        .answer-detail.wrong {
+            border-left-color: #dc3545;
+            background-color: #fef2f2;
+        }
+        
+        .answer-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        .answer-status {
             display: inline-block;
-            margin: 10px 10px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .answer-status.correct {
+            background-color: #28a745;
+            color: white;
+        }
+        .answer-status.wrong {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .answer-values {
+            margin-top: 10px;
+            font-size: 0.95em;
+            color: #495057;
+        }
+        .user-choice {
+            margin: 5px 0;
+        }
+        .user-choice.wrong {
+            color: #dc3545;
+        }
+        .correct-answer {
+            margin: 5px 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        /* 按鈕 */
+        .action-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .action-btn {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            text-decoration: none;
             cursor: pointer;
             border: none;
             transition: opacity 0.3s;
         }
-        .next-btn { background-color: #007bff; color: white; }
-        .next-btn:hover { background-color: #0056b3; }
-        .home-btn { background-color: #6c757d; color: white; }
-        .home-btn:hover { background-color: #5a6268; }
+        .next-btn { 
+            background-color: #007bff; 
+            color: white; 
+        }
+        .next-btn:hover { 
+            background-color: #0056b3; 
+        }
+        .home-btn { 
+            background-color: #6c757d; 
+            color: white; 
+        }
+        .home-btn:hover { 
+            background-color: #5a6268; 
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        {% if is_correct %}
-            <h1 class="correct">🎉 恭喜你，答對了！</h1>
+        <!-- 標題 -->
+        {% if all_correct %}
+            <h1 class="all-correct">🎉 太棒了！全部答對！</h1>
+        {% elif results and results|length > 0 and results|selectattr('correct', 'equalto', True)|list|length > 0 %}
+            <h1 class="some-wrong">⚠️ 部分答題有誤</h1>
         {% else %}
-            <h1 class="wrong">❌ 很可惜，答錯了。</h1>
+            <h1 class="all-wrong">❌ 再加油！</h1>
         {% endif %}
-
-        <div class="answer-box">
-            <p>你的選擇是：**{{ user_choice }}**</p>
-            <p>正確答案是：<strong style="color: #28a745;">{{ correct_answer }}</strong></p>
-        </div>
         
+        <!-- 統計 -->
+        {% if results and results|length > 0 %}
+        <div class="score-summary">
+            {% set correct_count = results|selectattr('correct', 'equalto', True)|list|length %}
+            <div class="score-text">
+                正確: <strong style="color: #28a745;">{{ correct_count }}/{{ results|length }}</strong>
+            </div>
+            {% if results|length > 1 %}
+            <div style="font-size: 0.9em; color: #6c757d;">
+                {% set percentage = (correct_count / results|length * 100)|int %}
+                得分: {{ percentage }}%
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- 詳細答案 -->
+        {% for result in results %}
+        <div class="answer-detail {% if result.correct %}correct{% else %}wrong{% endif %}">
+            <div class="answer-label">
+                {% if result.correct %}✓{% else %}✗{% endif %} 
+                {% if result.attribute_name %}{{ result.attribute_name }}{% else %}配料 {{ loop.index }}{% endif %}
+                <span class="answer-status {% if result.correct %}correct{% else %}wrong{% endif %}">
+                    {% if result.correct %}正確{% else %}錯誤{% endif %}
+                </span>
+            </div>
+
+            {% if result.question_text %}
+                <div style="margin-top: 6px; color:#495057;">
+                    <span style="color:#6c757d;">題目：</span>{{ result.question_text }}
+                    {% if result.unit %}<span style="color:#dc3545; font-weight:bold;">{{ result.unit }}</span>{% endif %}
+                </div>
+            {% endif %}
+            
+            <div class="answer-values">
+                {% if not result.correct %}
+                <div class="user-choice wrong">
+                    你的答案: <strong style="color: #dc3545;">{{ result.user_choice }}</strong> ❌
+                </div>
+                {% else %}
+                <div class="user-choice">
+                    你的答案: <strong style="color: #28a745;">{{ result.user_choice }}</strong> ✓
+                </div>
+                {% endif %}
+                <div class="correct-answer">
+                    正確答案: <strong style="color: #28a745;">{{ result.correct_answer }}</strong> ✓
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <!-- 按鈕 -->
         <div class="action-group">
             <form action="{{ url_for('quiz') }}" method="POST" style="display: inline;">
                 <input type="hidden" name="category_filter" value="{{ request_form.get('category_filter') }}">
-                <input type="hidden" name="item_filter" value="{{ request_form.get('item_filter') }}">
-                <input type="hidden" name="quiz_mode" value="{{ request_form.get('quiz_mode') }}"> 
-                <input type="hidden" name="quiz_method" value="{{ request_form.get('quiz_method') }}"> <button type="submit" class="next-btn">再來一題</button>
+                <input type="hidden" name="drink_filter" value="{{ request_form.get('drink_filter') }}">
+                <button type="submit" class="action-btn next-btn">再來一份飲料</button>
             </form>
 
-            <a href="{{ url_for('index') }}" class="home-btn">回首頁</a>
+            <a href="{{ url_for('index') }}" class="action-btn home-btn">回首頁</a>
         </div>
     </div>
 </body>

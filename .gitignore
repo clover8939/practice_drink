@@ -1,5 +1,38 @@
+# Python 虛擬環境
 venv/
+.venv/
+env/
+ENV/
+
+# Python 編譯檔案
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+
+# 環境變數
 .env
+
+# Socket 檔案
 quiz_app.sock
+
+# 作業系統
+.DS_Store
+Thumbs.db
+
+# 資料庫
+*.db
+*.sqlite
+*.sqlite3
+
+# CSV 檔案 (保留匯出檔案)
+*.csv
+!*_export_*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+

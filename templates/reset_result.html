@@ -20,7 +20,12 @@
             {% if message %}
                 <p>{{ message }}</p>
             {% else %}
-                <p>成功將 **{{ reset_count }}** 條已掌握的題目重置為待複習狀態。</p>
+                <p><strong>✅ 重置成功！</strong></p>
+                <p>已重置 <strong style="color: #007bff;">{{ drink_reset_count }}</strong> 杯飲料的掌握狀態</p>
+                <p>已重置 <strong style="color: #28a745;">{{ attr_reset_count }}</strong> 條屬性的答題記錄</p>
+                <p style="margin-top: 15px; font-size: 0.9em; color: #6c757d;">
+                    所有題目已恢復為「未掌握」狀態，答題統計已歸零。
+                </p>
             {% endif %}
         </div>
         

@@ -27,11 +27,14 @@
 
         <div class="format-info">
             <h4>CSV 檔案格式說明 (必須嚴格遵循此順序)：</h4>
-            <p>檔案必須是純文字 CSV 格式，且不包含標題行。每行應包含 5 個欄位：</p>
-            <code>分類, 品項名稱, 配料句子 (含 [NUM]), 正確數字, 單位</code>
+            <p>檔案必須是純文字 CSV 格式。可以包含或不包含標題列。</p>
+            <p>每行支援兩種格式（二擇一）：</p>
+            <code>5欄：category, drink_name, attribute_name, attribute_value, question_template</code>
+            <br>
+            <code>6欄：category, drink_name, attribute_name, attribute_value, unit, question_template</code>
             <p>範例：</p>
-            <code>茶類,珍珠奶茶,含糖量 [NUM] 公克, 50.5,公克</code>
-            <code>咖啡,美式咖啡,咖啡因含量 [NUM] 毫克, 150,毫克</code>
+            <code>茶類,珍珠奶茶,糖漿,30,糖漿需要 [NUM] ml</code>
+            <code>咖啡,美式咖啡,咖啡液,60,ml,咖啡液需要 [NUM] ml</code>
         </div>
         
         <form method="POST" enctype="multipart/form-data">

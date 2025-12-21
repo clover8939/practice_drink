@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理題庫</title>
+    <title>管理飲品與屬性</title>
     <style>
         body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; padding: 20px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
         h1 { color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #dee2e6; font-size: 0.9em; }
         th { background-color: #e9ecef; color: #495057; }
         .action-link { text-decoration: none; color: #28a745; margin-right: 10px; }
@@ -16,11 +16,17 @@
         .delete-btn { background: none; border: none; color: #dc3545; cursor: pointer; padding: 0; font-size: 1em; }
         .filter-group { margin-bottom: 20px; padding: 15px; border: 1px solid #ced4da; border-radius: 8px; background-color: #f4f7f9; }
         select { padding: 8px; border-radius: 4px; border: 1px solid #ced4da; margin-right: 15px; }
+    .badge { display:inline-block; padding: 3px 8px; border-radius: 999px; font-size: 0.8em; color: white; }
+    .badge-mastered { background: #28a745; }
+    .badge-learning { background: #6c757d; }
+    .attrs { margin-top: 6px; color:#495057; font-size:0.88em; }
+    .attrs ul { margin: 6px 0 0 18px; padding: 0; }
+    .attrs li { margin: 2px 0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 題庫管理與編輯</h1>
+    <h1>📝 飲品管理與編輯</h1>
 
         <div class="filter-group">
             <label for="category_filter">篩選分類:</label>
@@ -31,35 +37,58 @@
                 {% endfor %}
             </select>
             
-            <label for="item_filter">篩選品項:</label>
-            <select id="item_filter" onchange="filterTable()">
+            <label for="drink_filter">篩選飲品:</label>
+            <select id="drink_filter" onchange="filterTable()">
                 <option value="all">所有品項</option>
-                {% for item in all_items %}
-                    <option value="{{ item }}">{{ item }}</option>
+                {% for drink_name in all_drinks %}
+                    <option value="{{ drink_name }}">{{ drink_name }}</option>
                 {% endfor %}
             </select>
         </div>
 
-        <table id="quiz_table">
+        <table id="drinks_table">
             <thead>
                 <tr>
                     <th>分類</th>
-                    <th>品項名稱</th>
-                    <th>配料句子</th>
-                    <th>答案 (單位)</th>
+                    <th>飲品名稱</th>
+                    <th>掌握</th>
+                    <th>屬性/配料</th>
                     <th>操作</th>
                 </tr>
             </thead>
             <tbody>
-                {% for item in items %}
-                <tr data-category="{{ item.category }}" data-item="{{ item.item_name }}">
-                    <td>{{ item.category }}</td>
-                    <td>{{ item.item_name }}</td>
-                    <td>{{ item.sentence_template | replace('[NUM]', '____') }}</td>
-                    <td>**{{ item.correct_number }}** {{ item.unit }}</td>
+                {% for row in drinks_with_attrs %}
+                <tr data-category="{{ row.drink.category }}" data-drink="{{ row.drink.name }}">
+                    <td>{{ row.drink.category }}</td>
+                    <td><strong>{{ row.drink.name }}</strong></td>
                     <td>
-                        <a href="{{ url_for('edit_item', item_id=item.id) }}" class="action-link">編輯</a>
-                        <form method="POST" action="{{ url_for('delete_item', item_id=item.id) }}" class="delete-form" onsubmit="return confirm('確定要刪除這條題目嗎？');">
+                        {% if row.drink.is_mastered %}
+                            <span class="badge badge-mastered">已掌握</span>
+                        {% else %}
+                            <span class="badge badge-learning">未掌握</span>
+                        {% endif %}
+                    </td>
+                    <td class="attrs">
+                        {% if row.attributes and row.attributes|length > 0 %}
+                            <ul>
+                                {% for attr in row.attributes %}
+                                    <li>
+                                        <strong>{{ attr.attribute_name }}</strong>：{{ attr.attribute_value }}{% if attr.unit %} {{ attr.unit }}{% endif %}
+                                        {% if attr.times_attempted > 0 %}
+                                            <span style="color:#6c757d;">（{{ attr.times_correct }}/{{ attr.times_attempted }}）</span>
+                                        {% else %}
+                                            <span style="color:#adb5bd;">（未測驗）</span>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <span style="color:#6c757d;">(無屬性)</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_item', drink_id=row.drink.id) }}" class="action-link">編輯</a>
+                        <form method="POST" action="{{ url_for('delete_item', drink_id=row.drink.id) }}" class="delete-form" onsubmit="return confirm('確定要刪除這杯飲品嗎？（配料屬性也會一起刪除）');">
                             <button type="submit" class="delete-btn">刪除</button>
                         </form>
                     </td>
@@ -68,24 +97,24 @@
             </tbody>
         </table>
 
-        <p><a href="{{ url_for('create_item') }}">新增題目</a> | <a href="{{ url_for('index') }}">« 回首頁</a></p>
+        <p><a href="{{ url_for('create_item') }}">新增飲品</a> | <a href="{{ url_for('index') }}">« 回首頁</a></p>
     </div>
 
     <script>
         function filterTable() {
             const category = document.getElementById('category_filter').value;
-            const item = document.getElementById('item_filter').value;
-            const rows = document.getElementById('quiz_table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            const drink = document.getElementById('drink_filter').value;
+            const rows = document.getElementById('drinks_table').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
 
             for (let i = 0; i < rows.length; i++) {
                 const row = rows[i];
                 const rowCategory = row.getAttribute('data-category');
-                const rowItem = row.getAttribute('data-item');
+                const rowDrink = row.getAttribute('data-drink');
 
                 const categoryMatch = (category === 'all' || rowCategory === category);
-                const itemMatch = (item === 'all' || rowItem === item);
+                const drinkMatch = (drink === 'all' || rowDrink === drink);
 
-                if (categoryMatch && itemMatch) {
+                if (categoryMatch && drinkMatch) {
                     row.style.display = '';
                 } else {
                     row.style.display = 'none';

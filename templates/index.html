@@ -25,12 +25,13 @@
             <li><a href="{{ url_for('create_item') }}">建立新題目 (配料表)</a></li>
             <li><a href="{{ url_for('manage_items') }}" style="background-color: #ffc107;">📝 管理/編輯題庫</a></li>
             <li><a href="{{ url_for('import_items') }}" style="background-color: #17a2b8;">📥 匯入 CSV 題庫</a></li>
+            <li><a href="{{ url_for('export_items') }}" style="background-color: #6f42c1;">📤 匯出 CSV 備份</a></li>
         </ul>
 
 
         <form method="POST" action="{{ url_for('reset_mastery') }}" class="reset-form" 
-              onsubmit="return confirm('⚠️ 確定要重置所有答對的題目嗎？這會讓它們重新出現在測驗中。')">
-            <button type="submit" class="reset-btn">🔄 重置所有已掌握題目</button>
+              onsubmit="return confirm('⚠️ 確定要重置所有答題記錄嗎？\n\n這將會：\n• 清除所有飲料的掌握狀態\n• 歸零所有答題統計資料\n• 讓所有題目重新出現在測驗中\n\n此操作無法復原！')">
+            <button type="submit" class="reset-btn">🔄 重置所有答題記錄</button>
         </form>
     </div>
 </body>

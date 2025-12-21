@@ -3,103 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>開始測驗</title>
+    <title>飲料配方測驗</title>
     <style>
-        body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .container { max-width: 700px; margin: auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; }
-        h1 { color: #343a40; margin-bottom: 10px; }
-        .question-info { font-size: 0.9em; color: #6c757d; margin-bottom: 30px; }
-        .question-text { font-size: 1.8em; font-weight: 300; margin-bottom: 40px; }
-        .unit-highlight { color: #dc3545; font-weight: bold; }
-        
-        /* 卡片佈局與樣式 */
-        .card-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-        .card {
-            background-color: #e9ecef;
-            color: #495057;
-            padding: 25px;
-            border: none;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 1.4em;
-            font-weight: bold;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .card:hover {
-            background-color: #007bff;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
-            transform: translateY(-3px);
-        }
-        .fill-input-group { 
+        body { 
+            font-family: 'Arial', sans-serif; 
+            background-color: #f8f9fa; 
             display: flex; 
             justify-content: center; 
-            align-items: center;
-            gap: 10px;
-            margin-top: 30px;
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
         }
-        .fill-input {
-            padding: 15px;
-            font-size: 1.6em;
-            width: 150px;
+        .container { 
+            max-width: 800px; 
+            margin: auto; 
+            background: white; 
+            padding: 40px; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #343a40; 
+            margin-bottom: 10px; 
             text-align: center;
+        }
+        .drink-info { 
+            font-size: 1.1em; 
+            color: #6c757d; 
+            margin-bottom: 30px; 
+            text-align: center;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+        }
+        .category-badge {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        
+        /* 問題區域 */
+        .question-group {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+        }
+        .question-label {
+            font-size: 1em;
+            color: #495057;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .question-text {
+            font-size: 1.4em;
+            color: #343a40;
+            margin-bottom: 15px;
+            font-weight: 300;
+        }
+        .question-unit {
+            color: #dc3545; 
+            font-weight: bold;
+        }
+        
+        /* 下拉式選單 */
+        .select-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .question-select {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1.1em;
             border: 2px solid #ced4da;
             border-radius: 8px;
+            background-color: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
         }
-        .fill-btn {
-            background-color: #ffc100;
-            color: #343a40;
-            padding: 15px 30px;
+        .question-select:hover {
+            border-color: #007bff;
+        }
+        .question-select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        
+        /* 提交按鈕 */
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 40px;
             border: none;
             border-radius: 8px;
-            font-size: 1.4em;
+            font-size: 1.1em;
             cursor: pointer;
             transition: background-color 0.3s;
         }
-        .fill-btn:hover {
-            background-color: #e0a800;
+        .submit-btn:hover {
+            background-color: #1e7e34;
+        }
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .back-btn:hover {
+            background-color: #5a6268;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🤔 請填空</h1>
+        <h1>� {{ drink.name }}</h1>
         
-        <div class="question-info">
-            **{{ item.category }}** / **{{ item.item_name }}**
+        <div class="drink-info">
+            <span class="category-badge">📂 {{ drink.category }}</span>
+            <span style="color: #495057;">請回答以下各項配料的用量</span>
         </div>
         
-        <div class="question-text">
-            {{ question }} <span class="unit-highlight">{{ unit }}</span>
-        </div>
-        
-        <form id="quiz-form" action="{{ url_for('check_answer') }}" method="POST">
-            <input type="hidden" name="item_id" value="{{ item.id }}">
-            <input type="hidden" name="correct_answer" value="{{ correct_answer }}">
+        <form id="quiz-form" method="POST" action="{{ url_for('check_answer') }}">
+            {% for question in questions %}
+            <div class="question-group">
+                <div class="question-label">
+                    ❓ {{ question.name }}
+                </div>
+                <div class="question-text">
+                    {{ question.question }}
+                    <span class="question-unit">{{ question.unit }}</span>
+                </div>
+                
+                <div class="select-wrapper">
+                    <select name="choice_{{ question.id }}" class="question-select" required>
+                        <option value="">-- 請選擇 --</option>
+                        {% for option in question.options %}
+                            <option value="{{ option }}">{{ option }} {{ question.unit }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="correct_answer_{{ question.id }}" value="{{ question.correct_answer }}">
+                </div>
+            </div>
+            {% endfor %}
+            
+            <input type="hidden" name="drink_id" value="{{ drink.id }}">
             <input type="hidden" name="category_filter" value="{{ category_filter }}">
-            <input type="hidden" name="item_filter" value="{{ item_filter }}">
-            <input type="hidden" name="quiz_mode" value="{{ quiz_mode }}"> <div class="card-container"></div>
-            <input type="hidden" name="quiz_method" value="{{ quiz_method }}"> {% if quiz_method == 'card' %}
-
-            <div class="card-container">
-                    {% for option in options %}
-                        <button type="submit" name="choice" value="{{ option }}" class="card">
-                            {{ option }}
-                        </button>
-                    {% endfor %}
-                </div>
-            {% elif quiz_method == 'fill' %}
-            <div class="fill-input-group">
-                    <input type="text" name="choice" class="fill-input" placeholder="請輸入答案" required>
-                    <button type="submit" class="fill-btn">檢查答案</button>
-                </div>
-            {% endif %}
+            <input type="hidden" name="drink_filter" value="{{ drink_filter }}">
+            
+            <div class="form-actions">
+                <a href="{{ url_for('quiz') }}" class="back-btn">回首頁</a>
+                <button type="submit" class="submit-btn">✓ 提交答案</button>
+            </div>
         </form>
     </div>
 </body>

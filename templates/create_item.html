@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>建立新題目</title>
+    <title>建立新飲品</title>
     <style>
         body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .container { max-width: 820px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         h1 { color: #007bff; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         p { color: #6c757d; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #495057; }
@@ -14,33 +14,134 @@
         input[type="submit"] { background-color: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; }
         input[type="submit"]:hover { background-color: #1e7e34; }
         a { color: #007bff; text-decoration: none; margin-top: 20px; display: inline-block; }
+
+        .message-success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 12px; border-radius: 6px; font-weight: bold; }
+        .message-error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 12px; border-radius: 6px; font-weight: bold; }
+
+        .attrs-header { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+        .add-btn { background-color: #007bff; color: white; border: none; border-radius: 6px; padding: 10px 14px; cursor: pointer; }
+        .add-btn:hover { background-color: #0056b3; }
+        .attr-card { border: 1px solid #dee2e6; border-radius: 10px; padding: 16px; margin-top: 12px; background: #f8f9fa; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .remove-btn { background-color: #dc3545; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+        .remove-btn:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📝 建立新題目</h1>
-        <p>請在數字所在位置使用 <code>[NUM]</code> 作為佔位符。</p>
+        <h1>🧋 建立新飲品與配料屬性</h1>
+        <p>題目模板請在數字位置使用 <code>[NUM]</code> 作為佔位符，例如：<code>咖啡液需要 [NUM] ml</code>。</p>
+
+        {% if message %}
+            <p class="{{ 'message-success' if '✅' in message else 'message-error' }}">{{ message }}</p>
+        {% endif %}
         
         <form method="POST">
             <label for="category">飲品分類：</label>
             <input type="text" id="category" name="category" required placeholder="例如：茶類、咖啡">
             
-            <label for="item_name">品項名稱：</label>
-            <input type="text" id="item_name" name="item_name" required placeholder="例如：珍珠奶茶、美式咖啡">
+            <label for="drink_name">飲品名稱：</label>
+            <input type="text" id="drink_name" name="drink_name" required placeholder="例如：珍珠奶茶、美式咖啡">
 
-            <label for="correct_number">正確的數字：</label>
-            <input type="text" id="correct_number" name="correct_number" required placeholder="例如：10.5">
+
+            <div class="attrs-header">
+                <h3 style="margin: 0; color: #343a40;">配料/屬性（可多筆）</h3>
+                <button type="button" class="add-btn" onclick="addAttr()">＋新增一筆</button>
+            </div>
+
+            <input type="hidden" id="attribute_count" name="attribute_count" value="1">
+
+            <div id="attrs">
+                <div class="attr-card" data-idx="0">
+                    <div class="grid-3">
+                        <div>
+                            <label>屬性名稱：</label>
+                            <input type="text" name="attribute_name_0" required placeholder="例如：咖啡液、牛奶、糖漿">
+                        </div>
+                        <div>
+                            <label>正確數值：</label>
+                            <input type="text" name="attribute_value_0" required placeholder="例如：30">
+                        </div>
+                        <div>
+                            <label>單位（可空）：</label>
+                            <input type="text" name="attribute_unit_0" placeholder="例如：ml、g">
+                        </div>
+                    </div>
+                    <div>
+                        <label>題目模板（含 [NUM]）：</label>
+                        <textarea name="attribute_template_0" rows="2" required>需要 [NUM]</textarea>
+                    </div>
+                </div>
+            </div>
             
-            <label for="unit">單位：</label>
-            <input type="text" id="unit" name="unit" value="克" placeholder="例如：克、毫升">
-            
-            <label for="sentence_template">配料表句子 (含 [NUM]):</label>
-            <textarea id="sentence_template" name="sentence_template" rows="3" required>每100克脂肪含量為 [NUM] 克</textarea>
-            
-            <input type="submit" value="💾 儲存題目">
+            <input type="submit" value="💾 儲存飲品">
         </form>
         
         <p><a href="{{ url_for('index') }}">« 回首頁</a></p>
     </div>
+
+    <script>
+        function addAttr() {
+            const attrs = document.getElementById('attrs');
+            const countInput = document.getElementById('attribute_count');
+            const idx = parseInt(countInput.value, 10);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'attr-card';
+            wrapper.setAttribute('data-idx', idx);
+
+            wrapper.innerHTML = `
+                <div class="grid-3">
+                    <div>
+                        <label>屬性名稱：</label>
+                        <input type="text" name="attribute_name_${idx}" required placeholder="例如：咖啡液、牛奶、糖漿">
+                    </div>
+                    <div>
+                        <label>正確數值：</label>
+                        <input type="text" name="attribute_value_${idx}" required placeholder="例如：30">
+                    </div>
+                    <div>
+                        <label>單位（可空）：</label>
+                        <input type="text" name="attribute_unit_${idx}" placeholder="例如：ml、g">
+                    </div>
+                </div>
+                <div>
+                    <label>題目模板（含 [NUM]）：</label>
+                    <textarea name="attribute_template_${idx}" rows="2" required>需要 [NUM]</textarea>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+                    <button type="button" class="remove-btn" onclick="removeAttr(this)">移除此筆</button>
+                </div>
+            `;
+
+            attrs.appendChild(wrapper);
+            countInput.value = String(idx + 1);
+        }
+
+        function removeAttr(btn) {
+            const card = btn.closest('.attr-card');
+            if (!card) return;
+            card.remove();
+            renumberAttrs();
+        }
+
+        function renumberAttrs() {
+            const cards = Array.from(document.querySelectorAll('#attrs .attr-card'));
+            const countInput = document.getElementById('attribute_count');
+
+            cards.forEach((card, newIdx) => {
+                card.setAttribute('data-idx', newIdx);
+
+                card.querySelectorAll('input, textarea').forEach((el) => {
+                    const name = el.getAttribute('name');
+                    if (!name) return;
+                    el.setAttribute('name', name.replace(/_(\d+)$/, `_${newIdx}`));
+                });
+            });
+
+            countInput.value = String(cards.length);
+        }
+    </script>
 </body>
 </html>

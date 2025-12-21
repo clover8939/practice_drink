@@ -3,42 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>編輯題目 #{{ item.id }}</title>
+    <title>編輯飲品</title>
     <style>
         body { font-family: 'Arial', sans-serif; background-color: #f8f9fa; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         h1 { color: #ffc107; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         label { display: block; margin-top: 15px; font-weight: bold; color: #495057; }
         input[type="text"], textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ced4da; border-radius: 5px; box-sizing: border-box; font-size: 1em; }
         input[type="submit"] { background-color: #ffc107; color: #343a40; padding: 12px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; font-size: 16px; transition: background-color 0.3s; font-weight: bold; }
         input[type="submit"]:hover { background-color: #e0a800; }
         .back-link { color: #007bff; text-decoration: none; margin-top: 20px; display: inline-block; }
+
+        .message-error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; padding: 12px; border-radius: 6px; font-weight: bold; }
+        .attrs-header { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; }
+        .add-btn { background-color: #007bff; color: white; border: none; border-radius: 6px; padding: 10px 14px; cursor: pointer; }
+        .add-btn:hover { background-color: #0056b3; }
+        .attr-card { border: 1px solid #dee2e6; border-radius: 10px; padding: 16px; margin-top: 12px; background: #f8f9fa; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+        .remove-btn { background-color: #dc3545; color: white; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+        .remove-btn:hover { background-color: #c82333; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✏️ 編輯題目 (ID: {{ item.id }})</h1>
+        <h1>✏️ 編輯飲品與配料</h1>
+
+        {% if message %}
+            <p class="message-error">{{ message }}</p>
+        {% endif %}
         
         <form method="POST">
             <label for="category">飲品分類：</label>
-            <input type="text" id="category" name="category" required value="{{ item.category }}">
+            <input type="text" id="category" name="category" required value="{{ drink.category }}">
             
-            <label for="item_name">品項名稱：</label>
-            <input type="text" id="item_name" name="item_name" required value="{{ item.item_name }}">
+            <label for="name">飲品名稱：</label>
+            <input type="text" id="name" name="name" required value="{{ drink.name }}">
 
-            <label for="correct_number">正確的數字：</label>
-            <input type="text" id="correct_number" name="correct_number" required value="{{ item.correct_number }}">
-            
-            <label for="unit">單位：</label>
-            <input type="text" id="unit" name="unit" value="{{ item.unit }}">
-            
-            <label for="sentence_template">配料表句子 (含 [NUM]):</label>
-            <textarea id="sentence_template" name="sentence_template" rows="3" required>{{ item.sentence_template }}</textarea>
+            <div class="attrs-header">
+                <h3 style="margin:0;color:#343a40;">配料/屬性</h3>
+                <button type="button" class="add-btn" onclick="addAttr()">＋新增一筆</button>
+            </div>
+
+            <input type="hidden" id="attribute_count" name="attribute_count" value="{{ attributes|length }}">
+
+            <div id="attrs">
+                {% for attr in attributes %}
+                    <div class="attr-card" data-idx="{{ loop.index0 }}">
+                        <input type="hidden" name="attribute_id_{{ loop.index0 }}" value="{{ attr.id }}">
+
+                        <div class="grid-3">
+                            <div>
+                                <label>屬性名稱：</label>
+                                <input type="text" name="attribute_name_{{ loop.index0 }}" required value="{{ attr.attribute_name }}">
+                            </div>
+                            <div>
+                                <label>正確數值：</label>
+                                <input type="text" name="attribute_value_{{ loop.index0 }}" required value="{{ attr.attribute_value }}">
+                            </div>
+                            <div>
+                                <label>單位（可空）：</label>
+                                <input type="text" name="attribute_unit_{{ loop.index0 }}" value="{{ attr.unit }}">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label>題目模板（含 [NUM]）：</label>
+                            <textarea name="attribute_template_{{ loop.index0 }}" rows="2" required>{{ attr.question_template }}</textarea>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+                            <button type="button" class="remove-btn" onclick="removeAttr(this)">移除此筆</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
             
             <input type="submit" value="✅ 儲存修改">
         </form>
         
         <p><a href="{{ url_for('manage_items') }}" class="back-link">« 返回管理列表</a></p>
     </div>
+
+    <script>
+        function addAttr() {
+            const attrs = document.getElementById('attrs');
+            const countInput = document.getElementById('attribute_count');
+            const idx = parseInt(countInput.value, 10);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'attr-card';
+            wrapper.setAttribute('data-idx', idx);
+
+            wrapper.innerHTML = `
+                <input type="hidden" name="attribute_id_${idx}" value="">
+                <div class="grid-3">
+                    <div>
+                        <label>屬性名稱：</label>
+                        <input type="text" name="attribute_name_${idx}" required placeholder="例如：咖啡液、牛奶">
+                    </div>
+                    <div>
+                        <label>正確數值：</label>
+                        <input type="text" name="attribute_value_${idx}" required placeholder="例如：30">
+                    </div>
+                    <div>
+                        <label>單位（可空）：</label>
+                        <input type="text" name="attribute_unit_${idx}" placeholder="例如：ml、g">
+                    </div>
+                </div>
+                <div>
+                    <label>題目模板（含 [NUM]）：</label>
+                    <textarea name="attribute_template_${idx}" rows="2" required>需要 [NUM]</textarea>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+                    <button type="button" class="remove-btn" onclick="removeAttr(this)">移除此筆</button>
+                </div>
+            `;
+
+            attrs.appendChild(wrapper);
+            countInput.value = String(idx + 1);
+        }
+
+        function removeAttr(btn) {
+            const card = btn.closest('.attr-card');
+            if (!card) return;
+            card.remove();
+            renumberAttrs();
+        }
+
+        function renumberAttrs() {
+            const cards = Array.from(document.querySelectorAll('#attrs .attr-card'));
+            const countInput = document.getElementById('attribute_count');
+
+            cards.forEach((card, newIdx) => {
+                card.setAttribute('data-idx', newIdx);
+
+                card.querySelectorAll('input, textarea').forEach((el) => {
+                    const name = el.getAttribute('name');
+                    if (!name) return;
+                    el.setAttribute('name', name.replace(/_(\d+)$/, `_${newIdx}`));
+                });
+            });
+
+            countInput.value = String(cards.length);
+        }
+    </script>
 </body>
 </html>
