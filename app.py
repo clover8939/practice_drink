@@ -209,11 +209,13 @@ def quiz():
         return render_template('quiz.html', 
                                message="資料庫中沒有飲料，請先新增飲料後再開始測驗。",
                                all_categories=[], 
-                               all_drinks=[])
+                               all_drinks=[],
+                               quiz_mode='all')
 
     if request.method == 'POST':
         selected_category = request.form.get('category_filter', 'all')
         selected_drink = request.form.get('drink_filter', 'all')
+        quiz_mode = request.form.get('quiz_mode', 'all')  # 新增: 測驗模式
         
         where_clauses = []
         params = []
@@ -228,6 +230,80 @@ def quiz():
         
         sql_where = " WHERE " + " AND ".join(where_clauses) if where_clauses else ""
         
+        # 價錢測驗模式：隨機選取 5 道價錢題目
+        if quiz_mode == 'price':
+            # 從所有符合條件的飲料中,隨機選取 5 個價錢屬性
+            price_query = f'''
+                SELECT da.*, d.name as drink_name, d.category, d.id as drink_id
+                FROM drink_attributes da
+                JOIN drinks d ON da.drink_id = d.id
+                {sql_where}
+                {"AND" if sql_where else "WHERE"} da.attribute_name = '價錢'
+                ORDER BY RANDOM()
+                LIMIT 5
+            '''
+            price_attributes = db.execute(price_query, params).fetchall()
+            
+            if not price_attributes:
+                return render_template('quiz.html', 
+                                       message="沒有找到符合條件的價錢題目。", 
+                                       all_categories=all_categories, 
+                                       all_drinks=all_drinks,
+                                       selected_category=selected_category,
+                                       selected_drink=selected_drink,
+                                       quiz_mode=quiz_mode)
+            
+            # 為每個價錢屬性生成選項
+            drink_questions = []
+            for attr in price_attributes:
+                options = generate_attribute_options(attr['id'], attr['attribute_value'], db)
+                
+                # 處理問題模板,確保題目中包含飲料名稱
+                question_text = attr['question_template'].replace('[NUM]', '____')
+                
+                # 替換各種可能的通用詞彙為具體飲料名稱
+                replacements = [
+                    ('這杯飲料', f"「{attr['drink_name']}」"),
+                    ('這個食物', f"「{attr['drink_name']}」"),
+                    ('此飲品', f"「{attr['drink_name']}」"),
+                    ('該飲料', f"「{attr['drink_name']}」"),
+                ]
+                
+                for old, new in replacements:
+                    question_text = question_text.replace(old, new)
+                
+                # 如果題目中沒有包含飲料名稱,在前面加上
+                if attr['drink_name'] not in question_text:
+                    question_text = f"「{attr['drink_name']}」{question_text}"
+                
+                drink_questions.append({
+                    'id': attr['id'],
+                    'name': attr['attribute_name'],
+                    'drink_name': attr['drink_name'],  # 添加飲料名稱
+                    'category': attr['category'],
+                    'question': question_text,
+                    'unit': '',  # 價錢測驗不顯示單位,因為已經在問題模板中
+                    'correct_answer': attr['attribute_value'],
+                    'options': options,
+                    'is_price': True  # 標記為價錢題目
+                })
+            
+            # 使用虛擬的 drink 物件
+            virtual_drink = {
+                'id': 0,
+                'name': '價錢測驗',
+                'category': '混合題目'
+            }
+            
+            return render_template('quiz_question.html', 
+                                   drink=virtual_drink,
+                                   questions=drink_questions,
+                                   category_filter=selected_category,
+                                   drink_filter=selected_drink,
+                                   quiz_mode=quiz_mode,
+                                   is_price_quiz=True)
+        
+        # 配料測驗或全部測驗模式：選取一個飲料
         # 隨機選取一個飲料
         query = f'SELECT * FROM drinks {sql_where} ORDER BY RANDOM() LIMIT 1'
         drink = db.execute(query, params).fetchone()
@@ -238,27 +314,50 @@ def quiz():
                                    all_categories=all_categories, 
                                    all_drinks=all_drinks,
                                    selected_category=selected_category,
-                                   selected_drink=selected_drink)
+                                   selected_drink=selected_drink,
+                                   quiz_mode=quiz_mode)
 
         # 獲取該飲料的所有屬性
         attributes = get_drink_attributes(drink['id'])
         
+        # 根據測驗模式過濾屬性
+        if quiz_mode == 'price':
+            # 價錢測驗模式：只顯示屬性名稱為「價錢」的題目
+            attributes = [attr for attr in attributes if attr['attribute_name'] == '價錢']
+        elif quiz_mode == 'ingredient':
+            # 配料測驗模式：排除價錢，只顯示配料
+            attributes = [attr for attr in attributes if attr['attribute_name'] != '價錢']
+        # quiz_mode == 'all' 時不過濾，顯示所有屬性
+        
         if not attributes:
+            mode_text = "價錢" if quiz_mode == 'price' else "配料" if quiz_mode == 'ingredient' else ""
             return render_template('quiz.html', 
-                                   message="該飲料沒有配置屬性題目。", 
+                                   message=f"該飲料沒有配置{mode_text}題目。", 
                                    all_categories=all_categories, 
                                    all_drinks=all_drinks,
                                    selected_category=selected_category,
-                                   selected_drink=selected_drink)
+                                   selected_drink=selected_drink,
+                                   quiz_mode=quiz_mode)
 
         # 為每個屬性生成選項
         drink_questions = []
         for attr in attributes:
             options = generate_attribute_options(attr['id'], attr['attribute_value'], db)
+            
+            # 處理問題模板,加入飲料名稱讓題目更清楚
+            question_text = attr['question_template'].replace('[NUM]', '____')
+            
+            # 為配料測驗也在題目前加上飲料名稱
+            if quiz_mode != 'price' and drink:
+                # 如果題目中沒有包含飲料名稱,在前面加上
+                if drink['name'] not in question_text:
+                    question_text = f"「{drink['name']}」{question_text}"
+            
             drink_questions.append({
                 'id': attr['id'],
                 'name': attr['attribute_name'],
-                'question': f"{attr['question_template'].replace('[NUM]', '____')}",
+                'drink_name': drink['name'] if drink else None,  # 添加飲料名稱
+                'question': question_text,
                 'unit': attr['unit'],
                 'correct_answer': attr['attribute_value'],
                 'options': options
@@ -268,13 +367,15 @@ def quiz():
                                drink=drink,
                                questions=drink_questions,
                                category_filter=selected_category,
-                               drink_filter=selected_drink)
+                               drink_filter=selected_drink,
+                               quiz_mode=quiz_mode)
 
     return render_template('quiz.html', 
                            all_categories=all_categories, 
                            all_drinks=all_drinks, 
                            selected_category='all', 
-                           selected_drink='all')
+                           selected_drink='all',
+                           quiz_mode='all')
 
 @app.route('/check_answer', methods=['POST'])
 def check_answer():
@@ -301,17 +402,29 @@ def check_answer():
             if not user_choice or user_choice == '':
                 continue  # 跳過未作答的題目
             
-            # 取回 attribute 額外資訊（名稱/模板/單位）
+            # 取回 attribute 額外資訊（名稱/模板/單位/飲料名稱）
             attr_row = None
+            drink_name = None
             if attribute_id:
                 attr_row = db.execute(
-                    'SELECT attribute_name, question_template, unit FROM drink_attributes WHERE id = ?',
+                    '''SELECT da.attribute_name, da.question_template, da.unit, d.name as drink_name
+                       FROM drink_attributes da
+                       JOIN drinks d ON da.drink_id = d.id
+                       WHERE da.id = ?''',
                     (attribute_id,)
                 ).fetchone()
 
-            attribute_name = attr_row['attribute_name'] if attr_row else None
-            question_template = attr_row['question_template'] if attr_row else None
-            unit = attr_row['unit'] if attr_row else None
+            if attr_row:
+                attribute_name = attr_row['attribute_name']
+                question_template = attr_row['question_template']
+                unit = attr_row['unit']
+                drink_name = attr_row['drink_name']
+            else:
+                attribute_name = None
+                question_template = None
+                unit = None
+                drink_name = None
+                
             question_text = None
             if question_template:
                 question_text = question_template.replace('[NUM]', '____')
@@ -336,6 +449,7 @@ def check_answer():
                 'correct': is_correct,
                 'attribute_id': attribute_id,
                 'attribute_name': attribute_name,
+                'drink_name': drink_name,  # 新增飲料名稱
                 'question_text': question_text,
                 'unit': unit,
                 'user_choice': user_choice,

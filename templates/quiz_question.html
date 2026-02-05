@@ -5,68 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>飲料配方測驗</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body { 
-            font-family: 'Arial', sans-serif; 
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif; 
             background-color: #f8f9fa; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
             margin: 0; 
             padding: 20px;
+            min-height: 100vh;
         }
+        
         .container { 
-            max-width: 800px; 
-            margin: auto; 
+            max-width: 900px; 
+            margin: 0 auto; 
             background: white; 
-            padding: 40px; 
+            padding: 30px 40px;
             border-radius: 12px; 
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
+        
         h1 { 
             color: #343a40; 
-            margin-bottom: 10px; 
+            margin-bottom: 15px; 
             text-align: center;
+            font-size: 1.8em;
         }
+        
         .drink-info { 
-            font-size: 1.1em; 
+            font-size: 1em; 
             color: #6c757d; 
             margin-bottom: 30px; 
             text-align: center;
-            padding: 15px;
+            padding: 12px 20px;
             background-color: #f0f0f0;
             border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
+        
         .category-badge {
             display: inline-block;
             background-color: #007bff;
             color: white;
-            padding: 5px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
-            margin-right: 10px;
             font-size: 0.9em;
         }
         
         /* 問題區域 */
         .question-group {
             background-color: #f8f9fa;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
             border-radius: 10px;
-            border-left: 4px solid #007bff;
+            border-left: 5px solid #007bff;
         }
+        
         .question-label {
-            font-size: 1em;
+            font-size: 1.1em;
             color: #495057;
-            margin-bottom: 10px;
-            font-weight: 500;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
+        
         .question-text {
-            font-size: 1.4em;
+            font-size: 1.3em;
             color: #343a40;
-            margin-bottom: 15px;
-            font-weight: 300;
+            margin-bottom: 18px;
+            font-weight: 400;
+            line-height: 1.5;
         }
+        
         .question-unit {
             color: #dc3545; 
             font-weight: bold;
@@ -74,89 +88,134 @@
         
         /* 下拉式選單 */
         .select-wrapper {
-            position: relative;
-            margin-bottom: 15px;
+            margin-bottom: 0;
         }
+        
         .question-select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 16px;
             font-size: 1.1em;
             border: 2px solid #ced4da;
             border-radius: 8px;
             background-color: white;
             cursor: pointer;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
         }
+        
         .question-select:hover {
             border-color: #007bff;
         }
+        
         .question-select:focus {
             outline: none;
             border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
         }
         
         /* 提交按鈕 */
         .form-actions {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
             margin-top: 40px;
+            flex-wrap: wrap;
         }
-        .submit-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .submit-btn:hover {
-            background-color: #1e7e34;
-        }
-        .back-btn {
-            background-color: #6c757d;
-            color: white;
-            padding: 15px 40px;
+        
+        .submit-btn, .back-btn {
+            padding: 14px 35px;
             border: none;
             border-radius: 8px;
             font-size: 1.1em;
             cursor: pointer;
             text-decoration: none;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            display: inline-block;
         }
+        
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .back-btn {
+            background-color: #6c757d;
+            color: white;
+        }
+        
         .back-btn:hover {
             background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .question-text {
+                font-size: 1.1em;
+            }
+            
+            .question-select {
+                font-size: 1em;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .submit-btn, .back-btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>� {{ drink.name }}</h1>
+        <h1>🥤 {{ drink.name }}</h1>
         
         <div class="drink-info">
             <span class="category-badge">📂 {{ drink.category }}</span>
-            <span style="color: #495057;">請回答以下各項配料的用量</span>
+            {% if is_price_quiz %}
+                <span style="color: #495057;">請回答以下飲料的價格</span>
+            {% else %}
+                <span style="color: #495057;">請回答以下各項配料的用量</span>
+            {% endif %}
         </div>
         
         <form id="quiz-form" method="POST" action="{{ url_for('check_answer') }}">
             {% for question in questions %}
             <div class="question-group">
                 <div class="question-label">
-                    ❓ {{ question.name }}
+                    {% if is_price_quiz and question.drink_name %}
+                        💰 {{ question.drink_name }}
+                    {% else %}
+                        ❓ {{ question.name }}
+                    {% endif %}
                 </div>
                 <div class="question-text">
                     {{ question.question }}
-                    <span class="question-unit">{{ question.unit }}</span>
+                    {% if question.unit %}
+                        <span class="question-unit">{{ question.unit }}</span>
+                    {% endif %}
                 </div>
                 
                 <div class="select-wrapper">
                     <select name="choice_{{ question.id }}" class="question-select" required>
                         <option value="">-- 請選擇 --</option>
                         {% for option in question.options %}
-                            <option value="{{ option }}">{{ option }} {{ question.unit }}</option>
+                            <option value="{{ option }}">{{ option }}{% if question.unit %} {{ question.unit }}{% endif %}</option>
                         {% endfor %}
                     </select>
                     <input type="hidden" name="correct_answer_{{ question.id }}" value="{{ question.correct_answer }}">
@@ -167,6 +226,7 @@
             <input type="hidden" name="drink_id" value="{{ drink.id }}">
             <input type="hidden" name="category_filter" value="{{ category_filter }}">
             <input type="hidden" name="drink_filter" value="{{ drink_filter }}">
+            <input type="hidden" name="quiz_mode" value="{{ quiz_mode }}">
             
             <div class="form-actions">
                 <a href="{{ url_for('quiz') }}" class="back-btn">回首頁</a>

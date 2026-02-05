@@ -23,6 +23,13 @@
                 <p style="color: red; font-weight: bold; padding: 10px; background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 5px;">{{ message }}</p>
             {% endif %}
 
+            <label for="quiz_mode">測驗模式：</label>
+            <select id="quiz_mode" name="quiz_mode">
+                <option value="all" {% if quiz_mode == 'all' %}selected{% endif %}>全部測驗（配料+價錢）</option>
+                <option value="ingredient" {% if quiz_mode == 'ingredient' %}selected{% endif %}>只考配料</option>
+                <option value="price" {% if quiz_mode == 'price' %}selected{% endif %}>只考價錢 💰</option>
+            </select>
+
             <label for="category_filter">按分類考試：</label>
             <select id="category_filter" name="category_filter">
                 <option value="all">-- 所有分類 --</option>

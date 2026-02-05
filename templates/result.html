@@ -174,7 +174,13 @@
         <div class="answer-detail {% if result.correct %}correct{% else %}wrong{% endif %}">
             <div class="answer-label">
                 {% if result.correct %}✓{% else %}✗{% endif %} 
-                {% if result.attribute_name %}{{ result.attribute_name }}{% else %}配料 {{ loop.index }}{% endif %}
+                {% if result.drink_name %}
+                    <strong>{{ result.drink_name }}</strong> - {{ result.attribute_name if result.attribute_name else '配料 ' ~ loop.index }}
+                {% elif result.attribute_name %}
+                    {{ result.attribute_name }}
+                {% else %}
+                    配料 {{ loop.index }}
+                {% endif %}
                 <span class="answer-status {% if result.correct %}correct{% else %}wrong{% endif %}">
                     {% if result.correct %}正確{% else %}錯誤{% endif %}
                 </span>
@@ -209,6 +215,7 @@
             <form action="{{ url_for('quiz') }}" method="POST" style="display: inline;">
                 <input type="hidden" name="category_filter" value="{{ request_form.get('category_filter') }}">
                 <input type="hidden" name="drink_filter" value="{{ request_form.get('drink_filter') }}">
+                <input type="hidden" name="quiz_mode" value="{{ request_form.get('quiz_mode', 'all') }}">
                 <button type="submit" class="action-btn next-btn">再來一份飲料</button>
             </form>
 
